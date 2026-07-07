@@ -53,9 +53,6 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-line bg-white lg:flex">
       <div className="px-6 pt-6 pb-4">
         <DoorDashLogo className="h-[26px]" />
-        <p className="mt-1.5 text-[11px] font-semibold tracking-[0.14em] text-ink-tertiary uppercase">
-          Ops Command Center
-        </p>
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
