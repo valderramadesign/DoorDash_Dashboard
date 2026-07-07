@@ -1,7 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusChip } from '@/components/ui/StatusChip'
-import { summaryCards } from '@/data/mockData'
 import type { SummaryCard, Tone, TileAlert } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -69,13 +68,14 @@ function MetricCard({
 }
 
 interface StatusSummaryCardsProps {
+  cards: SummaryCard[]
   onOpenAlert: (title: string, tone: Tone, alert: TileAlert) => void
 }
 
-export function StatusSummaryCards({ onOpenAlert }: StatusSummaryCardsProps) {
+export function StatusSummaryCards({ cards, onOpenAlert }: StatusSummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-      {summaryCards.map((card) => (
+      {cards.map((card) => (
         <MetricCard key={card.label} card={card} onOpenAlert={onOpenAlert} />
       ))}
     </div>

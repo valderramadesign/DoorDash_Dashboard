@@ -1,29 +1,27 @@
 import type {
   Category,
-  ImpactCard,
+  ImpactTrackingItem,
   Issue,
-  RecommendedAction,
+  RiskWatchItem,
   SolutionFlow,
   SummaryCard,
   TopAction,
-  Zone,
 } from '@/types'
 
 export const summaryCards: SummaryCard[] = [
   {
-    label: 'Marketplace Health',
-    metric: '82',
-    metricSuffix: '/100',
-    chip: 'At risk',
+    label: 'Active Issues',
+    metric: '3',
+    chip: 'Attention needed',
     tone: 'danger',
-    supporting: '3 zones need action',
-    trend: 'Down 4 pts vs last hour',
-    trendDirection: 'down',
+    supporting: 'Prioritized in Needs attention now',
+    trend: 'Same as last hour',
+    trendDirection: 'flat',
     alert: {
       explanation:
-        'Overall marketplace health has dropped to 82/100, driven by supply shortfalls and slower deliveries across three zones.',
-      cause: 'Dasher undersupply and elevated merchant prep time compounding at dinner peak.',
-      recommendation: 'Review the top action items in Needs attention now to stabilize the affected zones.',
+        '3 issues are currently active across the marketplace, spanning supply, grocery availability, and merchant prep time.',
+      cause: 'Dinner peak demand and merchant variance are compounding across multiple zones.',
+      recommendation: 'Review the prioritized list in Needs attention now and act on the highest-impact issue first.',
     },
   },
   {
@@ -78,8 +76,8 @@ export const issues: Issue[] = [
     impact: '1,240 orders at risk',
     cause: 'Dasher supply -18% vs demand',
     recommendation: 'Add $2 peak pay for 90 minutes',
+    owner: 'Unassigned',
     primaryLabel: 'Review action',
-    secondaryLabel: 'View diagnosis',
   },
   {
     id: 'grocery-substitutions',
@@ -90,8 +88,8 @@ export const issues: Issue[] = [
     impact: 'Cancellation rate +3.1 pts',
     cause: 'Low item availability at 12 stores',
     recommendation: 'Notify merchant ops',
-    primaryLabel: 'Assign owner',
-    secondaryLabel: 'View stores',
+    owner: 'Merchant Ops',
+    primaryLabel: 'Review action',
   },
   {
     id: 'san-mateo-prep',
@@ -102,81 +100,45 @@ export const issues: Issue[] = [
     impact: 'Average delivery time +7 min',
     cause: 'Prep time variance at top 8 merchants',
     recommendation: 'Pause promo exposure in affected zone',
+    owner: 'Marketplace Ops',
     primaryLabel: 'Review action',
-    secondaryLabel: 'View merchants',
   },
 ]
 
-export const zones: Zone[] = [
+export const riskWatch: RiskWatchItem[] = [
   {
-    name: 'Mission',
-    status: 'Action needed',
-    tone: 'danger',
-    demand: '+22%',
-    supplyGap: '-18%',
-    deliveryTime: '41 min',
-    alert: {
-      explanation:
-        'Mission District demand is up 22% for dinner peak while Dasher supply is down 18%, putting roughly 1,240 orders at risk.',
-      cause: 'Dasher supply -18% vs demand during the dinner peak window.',
-      recommendation: 'Add $2 peak pay for 90 minutes to close the gap.',
-      issueId: 'mission-undersupply',
-    },
+    id: 'downtown-lunch-demand',
+    title: 'Downtown lunch demand trending +9% above forecast',
+    risk: 'Dasher supply gap likely within 45 min',
+    status: 'Watching',
+    statusTone: 'warn',
   },
   {
-    name: 'Downtown',
-    status: 'Watch',
-    tone: 'warn',
-    demand: '+12%',
-    supplyGap: '-7%',
-    deliveryTime: '34 min',
-    alert: {
-      explanation:
-        'Downtown demand is running 12% above baseline with a 7% supply shortfall, pushing delivery times to 34 minutes.',
-      cause: 'Dasher supply has not kept pace with a moderate demand increase.',
-      recommendation: 'Watch the zone closely and prepare a peak pay incentive if the gap widens.',
-    },
+    id: 'south-bay-grocery',
+    title: 'South Bay grocery availability declining',
+    risk: 'Cancellation rate may rise by evening peak',
+    status: 'Merchant Ops notified',
+    statusTone: 'neutral',
   },
-  {
-    name: 'San Mateo',
-    status: 'Watch',
-    tone: 'warn',
-    demand: '+8%',
-    supplyGap: '-5%',
-    deliveryTime: '38 min',
-    alert: {
-      explanation:
-        'San Mateo delivery times have climbed to 38 minutes, driven by prep time variance at the zone’s busiest merchants.',
-      cause: 'Prep time variance at top 8 merchants.',
-      recommendation: 'Pause promo exposure in the zone to reduce incoming order surge.',
-      issueId: 'san-mateo-prep',
-    },
-  },
-  {
-    name: 'Palo Alto',
-    status: 'Watch',
-    tone: 'warn',
-    demand: '+10%',
-    supplyGap: '-6%',
-    deliveryTime: '36 min',
-    alert: {
-      explanation:
-        'Palo Alto demand is up 10% with a 6% supply shortfall, keeping delivery times elevated at 36 minutes.',
-      cause: 'Dasher supply has not kept pace with a moderate demand increase.',
-      recommendation: 'Watch the zone closely and prepare a peak pay incentive if the gap widens.',
-    },
-  },
-  { name: 'SoMa', status: 'Healthy', tone: 'good', demand: '+4%', supplyGap: '-2%', deliveryTime: '29 min' },
-  { name: 'Oakland', status: 'Healthy', tone: 'good', demand: '+3%', supplyGap: '-1%', deliveryTime: '31 min' },
-  { name: 'Daly City', status: 'Healthy', tone: 'good', demand: '+2%', supplyGap: '0%', deliveryTime: '28 min' },
-  { name: 'Berkeley', status: 'Healthy', tone: 'good', demand: '+1%', supplyGap: '+2%', deliveryTime: '27 min' },
 ]
 
-export const imbalanceDrivers = [
-  'Dasher supply gap',
-  'Merchant prep time',
-  'Grocery item availability',
-  'Weather demand spike',
+export const impactTracking: ImpactTrackingItem[] = [
+  {
+    id: 'mission-peak-pay',
+    action: 'Mission District peak pay adjustment',
+    before: 'Supply gap -18%',
+    after: 'Supply gap -7%',
+    status: 'Improving',
+    statusTone: 'good',
+  },
+  {
+    id: 'san-mateo-promo-pause',
+    action: 'San Mateo promo exposure pause',
+    before: 'Avg delivery time +7 min',
+    after: 'Monitoring',
+    status: 'Pending signal',
+    statusTone: 'neutral',
+  },
 ]
 
 export const categories: Category[] = [
@@ -222,78 +184,6 @@ export const categories: Category[] = [
   },
   { name: 'Convenience', metric: '+4% demand', detail: 'On-time: 95%', status: 'Healthy', tone: 'good' },
   { name: 'Retail', metric: '-2% demand', detail: 'On-time: 94%', status: 'Healthy', tone: 'good' },
-]
-
-export const recommendedActions: RecommendedAction[] = [
-  {
-    id: 'promo-san-mateo',
-    action: 'Reduce promo exposure in San Mateo',
-    impact: 'Improve on-time rate +3 pts',
-    owner: 'Growth Ops',
-    confidence: 'Medium',
-    status: 'Needs approval',
-    statusTone: 'warn',
-  },
-  {
-    id: 'notify-grocery',
-    action: 'Notify grocery partners with low availability',
-    impact: 'Reduce cancels -1.8 pts',
-    owner: 'Merchant Ops',
-    confidence: 'High',
-    status: 'Assigned',
-    statusTone: 'neutral',
-  },
-  {
-    id: 'dashmart-inventory',
-    action: 'Shift DashMart inventory alert priority',
-    impact: 'Prevent stockouts',
-    owner: 'Retail Ops',
-    confidence: 'Medium',
-    status: 'In review',
-    statusTone: 'neutral',
-  },
-  {
-    id: 'peak-pay-mission',
-    action: 'Add $2 peak pay in Mission',
-    impact: 'Recover 430 orders',
-    owner: 'Supply Ops',
-    confidence: 'High',
-    status: 'Ready',
-    statusTone: 'good',
-  },
-]
-
-export const impactCards: ImpactCard[] = [
-  {
-    action: 'Merchant outreach',
-    result: 'No change yet',
-    status: 'Monitor',
-    tone: 'warn',
-    time: 'Owner follow-up due',
-  },
-  {
-    action: 'Peak pay added',
-    result: 'Supply gap improved 11 pts',
-    status: 'Working',
-    tone: 'good',
-    time: '45 min after launch',
-  },
-  {
-    action: 'Promo throttled',
-    result: 'Late orders down 6%',
-    status: 'Working',
-    tone: 'good',
-    time: '2 hours after change',
-  },
-]
-
-export const categoryFilters = [
-  'All categories',
-  'Restaurants',
-  'Grocery',
-  'Convenience',
-  'Retail',
-  'DashPass',
 ]
 
 const topActionTitles: Record<string, string> = {

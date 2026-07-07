@@ -1,14 +1,11 @@
 import {
-  Activity,
-  Bike,
   ClipboardList,
-  FlaskConical,
-  Home,
-  Megaphone,
+  LayoutDashboard,
+  Map,
+  Radar,
   Settings,
   Siren,
-  Store,
-  Timer,
+  Target,
   TrendingUp,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -21,19 +18,37 @@ interface NavItem {
   active?: boolean
 }
 
-const navItems: NavItem[] = [
-  { label: 'Home', icon: Home, active: true },
-  { label: 'Marketplace Health', icon: Activity },
-  { label: 'Supply', icon: Bike },
-  { label: 'Demand', icon: TrendingUp },
-  { label: 'Merchant Readiness', icon: Store },
-  { label: 'Delivery Reliability', icon: Timer },
-  { label: 'Promotions', icon: Megaphone },
-  { label: 'Incidents', icon: Siren },
-  { label: 'Experiments', icon: FlaskConical },
+const primaryNav: NavItem[] = [
+  { label: 'Command Center', icon: LayoutDashboard, active: true },
+  { label: 'Active Issues', icon: Siren },
+  { label: 'Risk Watch', icon: Radar },
+  { label: 'Markets', icon: Map },
+  { label: 'Forecasts', icon: TrendingUp },
+  { label: 'Impact Tracking', icon: Target },
+]
+
+const utilityNav: NavItem[] = [
   { label: 'Reports', icon: ClipboardList },
   { label: 'Settings', icon: Settings },
 ]
+
+function NavLink({ label, icon: Icon, active }: NavItem) {
+  return (
+    <a
+      href="#"
+      onClick={(e) => e.preventDefault()}
+      className={cn(
+        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors',
+        active
+          ? 'bg-canvas text-brand'
+          : 'text-ink-secondary hover:bg-canvas hover:text-ink',
+      )}
+    >
+      <Icon className="size-[18px]" strokeWidth={active ? 2.25 : 2} />
+      {label}
+    </a>
+  )
+}
 
 export function Sidebar() {
   return (
@@ -46,21 +61,14 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
-        {navItems.map(({ label, icon: Icon, active }) => (
-          <a
-            key={label}
-            href="#"
-            onClick={(e) => e.preventDefault()}
-            className={cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors',
-              active
-                ? 'bg-canvas text-brand'
-                : 'text-ink-secondary hover:bg-canvas hover:text-ink',
-            )}
-          >
-            <Icon className="size-[18px]" strokeWidth={active ? 2.25 : 2} />
-            {label}
-          </a>
+        {primaryNav.map((item) => (
+          <NavLink key={item.label} {...item} />
+        ))}
+      </nav>
+
+      <nav className="space-y-0.5 border-t border-line px-3 py-2">
+        {utilityNav.map((item) => (
+          <NavLink key={item.label} {...item} />
         ))}
       </nav>
 

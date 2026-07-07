@@ -1,8 +1,9 @@
-import { ArrowRight, Check, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Sparkles, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { StatusChip } from '@/components/ui/StatusChip'
 import type { Issue } from '@/types'
+import { cn } from '@/lib/utils'
 
 function IssueCard({
   issue,
@@ -11,10 +12,12 @@ function IssueCard({
   issue: Issue
   onOpen: (issue: Issue) => void
 }) {
+  const unassigned = issue.owner.toLowerCase() === 'unassigned'
+
   return (
     <div className="rounded-2xl border border-line p-5 transition-colors hover:border-ink-tertiary/40">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <StatusChip tone={issue.tone} dot>
               {issue.severity}
@@ -23,29 +26,39 @@ function IssueCard({
               {issue.tags.join(' · ')}
             </span>
           </div>
-          <h3 className="mt-2 text-[17px] font-bold">{issue.title}</h3>
-          <p className="mt-1 text-sm text-ink-secondary">
-            <span className="font-semibold text-danger">{issue.impact}</span>
-            <span className="mx-2 text-line">|</span>
-            {issue.cause}
-          </p>
+
+          <h3 className="mt-2.5 text-[17px] font-bold">{issue.title}</h3>
+
+          <dl className="mt-2 space-y-1 text-sm">
+            <div className="flex gap-2">
+              <dt className="shrink-0 text-ink-tertiary">Impact</dt>
+              <dd className="font-semibold text-danger">{issue.impact}</dd>
+            </div>
+            <div className="flex gap-2">
+              <dt className="shrink-0 text-ink-tertiary">Root cause</dt>
+              <dd className="text-ink-secondary">{issue.cause}</dd>
+            </div>
+          </dl>
+
           <p className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-brand-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
             <Sparkles className="size-3.5" />
             Recommended: {issue.recommendation}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
+
+        <div className="flex shrink-0 flex-col items-end gap-3">
           <Button variant="dark" size="sm" onClick={() => onOpen(issue)}>
             {issue.primaryLabel}
           </Button>
-          <button
-            type="button"
-            onClick={() => onOpen(issue)}
-            className="flex cursor-pointer items-center gap-1 text-[13px] font-semibold text-ink-secondary transition-colors hover:text-ink"
+          <span
+            className={cn(
+              'flex items-center gap-1.5 text-[13px] font-semibold',
+              unassigned ? 'text-warn' : 'text-ink-secondary',
+            )}
           >
-            {issue.secondaryLabel}
-            <ArrowRight className="size-3.5" />
-          </button>
+            <UserRound className="size-3.5" />
+            {unassigned ? 'Unassigned' : issue.owner}
+          </span>
         </div>
       </div>
     </div>
@@ -72,8 +85,8 @@ export function NeedsAttentionNow({
             )}
           </h2>
           <p className="mt-1 text-sm text-ink-secondary">
-            Prioritized issues based on order risk, customer impact, and
-            operational urgency.
+            Prioritized by order risk, customer impact, and operational
+            urgency.
           </p>
         </div>
         {issues.length > 0 && (

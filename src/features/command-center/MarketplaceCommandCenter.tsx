@@ -1,14 +1,13 @@
-import { useState } from 'react'
-import { issues } from '@/data/mockData'
+import { useMemo, useState } from 'react'
+import { issues, summaryCards } from '@/data/mockData'
 import type { Issue, Tone, TileAlert } from '@/types'
-import { ActionImpact } from './ActionImpact'
 import { CategoryHealth } from './CategoryHealth'
+import { ImpactTracking } from './ImpactTracking'
 import { IssueAlertModal } from './IssueAlertModal'
 import { IssueDrawer } from './IssueDrawer'
-import { MarketplaceBalance } from './MarketplaceBalance'
 import { NeedsAttentionNow } from './NeedsAttentionNow'
 import { PageHeader } from './PageHeader'
-import { RecommendedActions } from './RecommendedActions'
+import { RiskWatch } from './RiskWatch'
 import { SolutionFlow } from './SolutionFlow'
 import { StatusSummaryCards } from './StatusSummaryCards'
 import { WelcomeModal } from './WelcomeModal'
@@ -32,15 +31,29 @@ export function MarketplaceCommandCenter() {
   const openAlert = (title: string, tone: Tone, alert: TileAlert) =>
     setAlertTile({ title, tone, alert })
 
+  const statusCards = useMemo(() => {
+    const [activeIssuesCard, ...rest] = summaryCards
+    return [
+      {
+        ...activeIssuesCard,
+        metric: String(activeIssues.length),
+        tone: activeIssues.length > 0 ? 'danger' : 'good',
+        chip: activeIssues.length > 0 ? 'Attention needed' : 'All clear',
+      } satisfies (typeof summaryCards)[number],
+      ...rest,
+    ]
+  }, [activeIssues.length])
+
   return (
     <div className="mx-auto max-w-[1440px] space-y-6 px-5 py-6 sm:px-8 sm:py-8">
       <PageHeader />
-      <StatusSummaryCards onOpenAlert={openAlert} />
+      <StatusSummaryCards cards={statusCards} onOpenAlert={openAlert} />
       <NeedsAttentionNow issues={activeIssues} onOpenIssue={setOpenIssue} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <RiskWatch />
+        <ImpactTracking />
+      </div>
       <CategoryHealth onOpenAlert={openAlert} />
-      <RecommendedActions />
-      <ActionImpact />
-      <MarketplaceBalance onOpenAlert={openAlert} />
       <IssueDrawer
         issue={openIssue}
         onClose={() => setOpenIssue(null)}

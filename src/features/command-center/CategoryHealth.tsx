@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import {
   Beer,
+  ChevronDown,
   Package,
   ShoppingBasket,
   Store,
@@ -32,47 +34,72 @@ interface CategoryHealthProps {
 }
 
 export function CategoryHealth({ onOpenAlert }: CategoryHealthProps) {
+  const [open, setOpen] = useState(false)
+
   return (
-    <section>
-      <h2 className="text-[22px] font-bold tracking-tight">Category health</h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {categories.map((category) => {
-          const Icon = categoryIcons[category.name] ?? Store
-          return (
-            <Card
-              key={category.name}
-              onClick={
-                category.alert
-                  ? () => onOpenAlert(category.name, category.tone, category.alert!)
-                  : undefined
-              }
-              className={cn(
-                'p-5 transition-shadow hover:shadow-md',
-                category.alert && 'cursor-pointer',
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <Icon className="size-5 text-ink-secondary" />
-                <StatusChip tone={category.tone} dot>
-                  {category.status}
-                </StatusChip>
-              </div>
-              <h3 className="mt-3 text-[15px] font-bold">{category.name}</h3>
-              <p
-                className={`mt-1 text-xl font-bold tracking-tight ${toneTextColor[category.tone]}`}
+    <Card className="p-6">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
+      >
+        <div>
+          <h2 className="text-[18px] font-bold tracking-tight">
+            Category health
+          </h2>
+          <p className="mt-0.5 text-sm text-ink-secondary">
+            Reference view of demand and reliability by category.
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            'size-5 shrink-0 text-ink-tertiary transition-transform',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {categories.map((category) => {
+            const Icon = categoryIcons[category.name] ?? Store
+            return (
+              <div
+                key={category.name}
+                onClick={
+                  category.alert
+                    ? () => onOpenAlert(category.name, category.tone, category.alert!)
+                    : undefined
+                }
+                className={cn(
+                  'rounded-2xl border border-line p-5 transition-colors hover:border-ink-tertiary/40',
+                  category.alert && 'cursor-pointer',
+                )}
               >
-                {category.metric.replace(' demand', '')}
-                <span className="ml-1 text-[13px] font-medium text-ink-tertiary">
-                  demand
-                </span>
-              </p>
-              <p className="mt-0.5 text-[13px] text-ink-secondary">
-                {category.detail}
-              </p>
-            </Card>
-          )
-        })}
-      </div>
-    </section>
+                <div className="flex items-center justify-between">
+                  <Icon className="size-5 text-ink-secondary" />
+                  <StatusChip tone={category.tone} dot>
+                    {category.status}
+                  </StatusChip>
+                </div>
+                <h3 className="mt-3 text-[15px] font-bold">{category.name}</h3>
+                <p
+                  className={`mt-1 text-xl font-bold tracking-tight ${toneTextColor[category.tone]}`}
+                >
+                  {category.metric.replace(' demand', '')}
+                  <span className="ml-1 text-[13px] font-medium text-ink-tertiary">
+                    demand
+                  </span>
+                </p>
+                <p className="mt-0.5 text-[13px] text-ink-secondary">
+                  {category.detail}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </Card>
   )
 }

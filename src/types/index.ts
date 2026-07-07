@@ -28,18 +28,25 @@ export interface Issue {
   impact: string
   cause: string
   recommendation: string
+  owner: string
   primaryLabel: string
-  secondaryLabel: string
 }
 
-export interface Zone {
-  name: string
-  status: 'Healthy' | 'Watch' | 'Action needed'
-  tone: Tone
-  demand: string
-  supplyGap: string
-  deliveryTime: string
-  alert?: TileAlert
+export interface RiskWatchItem {
+  id: string
+  title: string
+  risk: string
+  status: string
+  statusTone: Tone
+}
+
+export interface ImpactTrackingItem {
+  id: string
+  action: string
+  before: string
+  after: string
+  status: string
+  statusTone: Tone
 }
 
 export interface Category {
@@ -49,24 +56,6 @@ export interface Category {
   status: 'Healthy' | 'Watch' | 'Action needed'
   tone: Tone
   alert?: TileAlert
-}
-
-export interface RecommendedAction {
-  id: string
-  action: string
-  impact: string
-  owner: string
-  confidence: 'High' | 'Medium' | 'Low'
-  status: string
-  statusTone: Tone
-}
-
-export interface ImpactCard {
-  action: string
-  result: string
-  status: 'Working' | 'Monitor'
-  tone: Tone
-  time: string
 }
 
 export interface TopAction {
