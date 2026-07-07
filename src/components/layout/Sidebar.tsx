@@ -25,12 +25,10 @@ const primaryNav: NavItem[] = [
   { label: 'Markets', icon: Map },
   { label: 'Forecasts', icon: TrendingUp },
   { label: 'Impact Tracking', icon: Target },
+  { label: 'Reports', icon: ClipboardList },
 ]
 
-const utilityNav: NavItem[] = [
-  { label: 'Reports', icon: ClipboardList },
-  { label: 'Settings', icon: Settings },
-]
+const utilityNav: NavItem[] = [{ label: 'Settings', icon: Settings }]
 
 function NavLink({ label, icon: Icon, active }: NavItem) {
   return (
@@ -66,12 +64,6 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <nav className="space-y-0.5 border-t border-line px-3 py-2">
-        {utilityNav.map((item) => (
-          <NavLink key={item.label} {...item} />
-        ))}
-      </nav>
-
       <div className="flex items-center gap-3 border-t border-line px-6 py-4">
         <img
           src="/JL-Persona.png"
@@ -83,6 +75,12 @@ export function Sidebar() {
           <p className="text-xs text-ink-tertiary">Marketplace Ops</p>
         </div>
       </div>
+
+      <nav className="space-y-0.5 border-t border-line px-3 py-2">
+        {utilityNav.map((item) => (
+          <NavLink key={item.label} {...item} />
+        ))}
+      </nav>
     </aside>
   )
 }
