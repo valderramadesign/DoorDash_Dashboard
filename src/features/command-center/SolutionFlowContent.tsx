@@ -35,6 +35,10 @@ export function SolutionFlowContent({
       return rec >= 0 ? rec : 0
     }),
   )
+  const [customText, setCustomText] = useState('')
+  // True once the flow was completed via the "Something else…" path, which
+  // skips the remaining steps and shows a generic confirmation instead.
+  const [customSuccess, setCustomSuccess] = useState(false)
 
   const totalSteps = flow?.steps.length ?? 0
   const isSuccess = stepIndex >= totalSteps
@@ -50,9 +54,22 @@ export function SolutionFlowContent({
   if (!flow) return null
 
   const step = flow.steps[stepIndex]
+  // The synthetic "Something else…" option lives just past the real ones.
+  const customIndex = step ? step.options.length : -1
+  const isCustom = step ? selections[stepIndex] === customIndex : false
+  const continueDisabled = isCustom && customText.trim() === ''
 
-  const handleContinue = () => setStepIndex((i) => i + 1)
+  const handleContinue = () => {
+    if (isCustom) {
+      setCustomSuccess(true)
+      setStepIndex(totalSteps)
+    } else {
+      setCustomSuccess(false)
+      setStepIndex((i) => i + 1)
+    }
+  }
   const handleBack = () => {
+    setCustomSuccess(false)
     if (stepIndex === 0) onBack()
     else setStepIndex((i) => i - 1)
   }
@@ -95,22 +112,26 @@ export function SolutionFlowContent({
             <Check className="size-7 text-good" strokeWidth={2.75} />
           </div>
           <h3 className="mt-4 text-xl font-bold tracking-tight">
-            {flow.success.title}
+            {customSuccess ? 'Action taken' : flow.success.title}
           </h3>
           <p className="mx-auto mt-2 max-w-[320px] text-sm leading-relaxed text-ink-secondary">
-            {flow.success.description}
+            {customSuccess
+              ? 'Your action has been taken. We’ll track its impact below.'
+              : flow.success.description}
           </p>
-          <ul className="mt-5 divide-y divide-line rounded-2xl border border-line text-left">
-            {flow.success.results.map((result) => (
-              <li
-                key={result.label}
-                className="flex items-center justify-between px-4 py-3 text-sm"
-              >
-                <span className="text-ink-secondary">{result.label}</span>
-                <span className="font-bold text-good">{result.value}</span>
-              </li>
-            ))}
-          </ul>
+          {!customSuccess && (
+            <ul className="mt-5 divide-y divide-line rounded-2xl border border-line text-left">
+              {flow.success.results.map((result) => (
+                <li
+                  key={result.label}
+                  className="flex items-center justify-between px-4 py-3 text-sm"
+                >
+                  <span className="text-ink-secondary">{result.label}</span>
+                  <span className="font-bold text-good">{result.value}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="mx-auto mt-4 max-w-[320px] text-[13px] leading-relaxed text-ink-tertiary">
             This issue has been addressed and moved to{' '}
             <span className="font-semibold text-ink-secondary">
@@ -185,6 +206,43 @@ export function SolutionFlowContent({
                 </button>
               )
             })}
+
+            <button
+              type="button"
+              onClick={() => selectOption(customIndex)}
+              className={cn(
+                'flex w-full cursor-pointer items-start gap-3 rounded-2xl border p-3.5 text-left transition-colors',
+                isCustom
+                  ? 'border-line bg-canvas'
+                  : 'border-line hover:border-ink-tertiary/40',
+              )}
+            >
+              <span
+                className={cn(
+                  'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border-2',
+                  isCustom ? 'border-brand' : 'border-ink-tertiary/40',
+                )}
+              >
+                {isCustom && <span className="size-2 rounded-full bg-brand" />}
+              </span>
+              <span className="min-w-0">
+                <span className="text-sm font-bold text-ink">Something else…</span>
+                <span className="mt-0.5 block text-[13px] text-ink-secondary">
+                  Describe a different action for the assistant to take.
+                </span>
+              </span>
+            </button>
+
+            {isCustom && (
+              <textarea
+                autoFocus
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                rows={3}
+                placeholder="Describe the action you’d like to take instead…"
+                className="w-full resize-none rounded-2xl border border-line bg-white px-3.5 py-3 text-sm text-ink placeholder:text-ink-tertiary focus:border-brand focus:outline-none"
+              />
+            )}
           </div>
         </div>
       )}
@@ -193,6 +251,7 @@ export function SolutionFlowContent({
         <Button
           variant="primary"
           className="w-full justify-center"
+          disabled={continueDisabled}
           onClick={isSuccess ? onComplete : handleContinue}
         >
           {isSuccess ? 'Done' : 'Continue'}
