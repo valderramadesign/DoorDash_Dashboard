@@ -11,8 +11,8 @@ import type { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusChip } from '@/components/ui/StatusChip'
 import { categories } from '@/data/mockData'
-import type { Tone, TileAlert } from '@/types'
-import { cn } from '@/lib/utils'
+import type { MorphOrigin, Tone, TileAlert } from '@/types'
+import { cn, morphOriginFrom } from '@/lib/utils'
 
 const categoryIcons: Record<string, LucideIcon> = {
   Restaurants: UtensilsCrossed,
@@ -30,7 +30,12 @@ const toneTextColor: Record<Tone, string> = {
 }
 
 interface CategoryHealthProps {
-  onOpenAlert: (title: string, tone: Tone, alert: TileAlert) => void
+  onOpenAlert: (
+    title: string,
+    tone: Tone,
+    alert: TileAlert,
+    origin: MorphOrigin,
+  ) => void
 }
 
 export function CategoryHealth({ onOpenAlert }: CategoryHealthProps) {
@@ -69,7 +74,13 @@ export function CategoryHealth({ onOpenAlert }: CategoryHealthProps) {
                 key={category.name}
                 onClick={
                   category.alert
-                    ? () => onOpenAlert(category.name, category.tone, category.alert!)
+                    ? (e) =>
+                        onOpenAlert(
+                          category.name,
+                          category.tone,
+                          category.alert!,
+                          morphOriginFrom(e.currentTarget),
+                        )
                     : undefined
                 }
                 className={cn(

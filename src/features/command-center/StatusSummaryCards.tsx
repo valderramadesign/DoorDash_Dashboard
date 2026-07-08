@@ -1,8 +1,8 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusChip } from '@/components/ui/StatusChip'
-import type { SummaryCard, Tone, TileAlert } from '@/types'
-import { cn } from '@/lib/utils'
+import type { MorphOrigin, SummaryCard, Tone, TileAlert } from '@/types'
+import { cn, morphOriginFrom } from '@/lib/utils'
 
 const trendIcons = {
   up: ArrowUpRight,
@@ -22,7 +22,12 @@ function MetricCard({
   onOpenAlert,
 }: {
   card: SummaryCard
-  onOpenAlert: (title: string, tone: Tone, alert: TileAlert) => void
+  onOpenAlert: (
+    title: string,
+    tone: Tone,
+    alert: TileAlert,
+    origin: MorphOrigin,
+  ) => void
 }) {
   const TrendIcon = trendIcons[card.trendDirection]
   const trendColor =
@@ -35,7 +40,15 @@ function MetricCard({
   return (
     <Card
       onClick={
-        card.alert ? () => onOpenAlert(card.label, card.tone, card.alert!) : undefined
+        card.alert
+          ? (e) =>
+              onOpenAlert(
+                card.label,
+                card.tone,
+                card.alert!,
+                morphOriginFrom(e.currentTarget),
+              )
+          : undefined
       }
       className={cn(
         'p-6 transition-shadow hover:shadow-md',
@@ -69,7 +82,12 @@ function MetricCard({
 
 interface StatusSummaryCardsProps {
   cards: SummaryCard[]
-  onOpenAlert: (title: string, tone: Tone, alert: TileAlert) => void
+  onOpenAlert: (
+    title: string,
+    tone: Tone,
+    alert: TileAlert,
+    origin: MorphOrigin,
+  ) => void
 }
 
 export function StatusSummaryCards({ cards, onOpenAlert }: StatusSummaryCardsProps) {

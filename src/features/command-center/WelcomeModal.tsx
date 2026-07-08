@@ -33,9 +33,9 @@ export function WelcomeModal({ onGo, onDismiss }: WelcomeModalProps) {
     <>
       <div
         aria-hidden
-        className="fixed inset-0 z-40 bg-ink/50 backdrop-blur-sm"
+        className="fixed inset-0 z-40 m-0 bg-ink/50 backdrop-blur-sm"
       />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 m-0 flex items-center justify-center p-4">
         <div
           role="dialog"
           aria-modal="true"

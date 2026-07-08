@@ -7,6 +7,15 @@ export interface TileAlert {
   issueId?: string
 }
 
+/** Position + radius of the tile a morph transition should originate from. */
+export interface MorphOrigin {
+  top: number
+  left: number
+  width: number
+  height: number
+  radius: number
+}
+
 export interface SummaryCard {
   label: string
   metric: string

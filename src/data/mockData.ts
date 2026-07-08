@@ -22,6 +22,7 @@ export const summaryCards: SummaryCard[] = [
         '3 issues are currently active across the marketplace, spanning supply, grocery availability, and merchant prep time.',
       cause: 'Dinner peak demand and merchant variance are compounding across multiple zones.',
       recommendation: 'Review the prioritized list in Needs attention now and act on the highest-impact issue first.',
+      issueId: 'active-issues',
     },
   },
   {
@@ -53,6 +54,7 @@ export const summaryCards: SummaryCard[] = [
         'Order demand is running 14% above forecast, with the gap growing since 4 PM as dinner peak arrives stronger than expected.',
       cause: 'Forecast underestimated dinner peak demand across multiple zones.',
       recommendation: 'Monitor supply coverage closely and be ready to add incentives if the gap widens further.',
+      issueId: 'demand-forecast',
     },
   },
   {
@@ -104,6 +106,36 @@ export const issues: Issue[] = [
     primaryLabel: 'Review action',
   },
 ]
+
+// Tiles whose alert doesn't map to a Needs-attention issue still drive a full
+// solution flow. These synthetic issues supply the title, impact and id the
+// flow and Impact tracking need, without appearing in the active issue list.
+export const tileIssues: Record<string, Issue> = {
+  'active-issues': {
+    id: 'active-issues',
+    title: 'Marketplace triage plan',
+    severity: 'High',
+    tone: 'danger',
+    tags: ['Marketplace'],
+    impact: '3 active issues',
+    cause: 'Dinner peak demand and merchant variance compounding across zones',
+    recommendation: 'Launch a coordinated triage plan',
+    owner: 'Marketplace Ops',
+    primaryLabel: 'Review action',
+  },
+  'demand-forecast': {
+    id: 'demand-forecast',
+    title: 'Demand surge response',
+    severity: 'Medium',
+    tone: 'warn',
+    tags: ['Demand'],
+    impact: 'Demand +14% vs forecast',
+    cause: 'Forecast underestimated dinner peak demand across zones',
+    recommendation: 'Pre-position supply and incentives',
+    owner: 'Supply Ops',
+    primaryLabel: 'Review action',
+  },
+}
 
 export const riskWatch: RiskWatchItem[] = [
   {
@@ -200,6 +232,98 @@ export const topActions: TopAction[] = issues.map((issue) => ({
 }))
 
 export const solutionFlows: Record<string, SolutionFlow> = {
+  'active-issues': {
+    steps: [
+      {
+        title: 'Choose triage approach',
+        description:
+          'Decide how to work through the three active issues across supply, grocery and prep time.',
+        options: [
+          {
+            label: 'Highest-impact first',
+            detail: 'Tackle the biggest order risk first',
+            recommended: true,
+          },
+          { label: 'Batch by category', detail: 'Group issues by marketplace area' },
+          { label: 'Split across team', detail: 'Assign each issue to a different owner' },
+        ],
+      },
+      {
+        title: 'Set response window',
+        description: 'Pick how quickly the plan needs to show progress.',
+        options: [
+          { label: 'Next 60 minutes', detail: 'Contain issues before peak deepens', recommended: true },
+          { label: 'Next 2 hours', detail: 'Steady pace through the evening' },
+          { label: 'Rest of shift', detail: 'Lower urgency, monitor over time' },
+        ],
+      },
+      {
+        title: 'Notify & assign',
+        description: 'Alert the team and put the plan on the record.',
+        options: [
+          { label: 'Alert on-call ops', detail: 'Notify the on-call marketplace team' },
+          { label: 'Assign owners per issue', detail: 'Route each issue to a named owner' },
+          { label: 'Do both', detail: 'Alert on-call and assign owners', recommended: true },
+        ],
+      },
+    ],
+    success: {
+      title: 'Response plan active',
+      description:
+        'A coordinated triage plan is live across all three active issues, with owners assigned and a 60-minute first review.',
+      results: [
+        { label: 'Issues in plan', value: '3' },
+        { label: 'First review', value: '60 min' },
+        { label: 'Owners assigned', value: 'All' },
+      ],
+    },
+  },
+  'demand-forecast': {
+    steps: [
+      {
+        title: 'Choose demand response',
+        description:
+          'Order demand is running 14% above forecast. Decide how to protect supply coverage.',
+        options: [
+          {
+            label: 'Pre-position peak pay',
+            detail: 'Pull Dashers in ahead of the gap',
+            recommended: true,
+          },
+          { label: 'Raise forecast baseline', detail: 'Reset the model to current demand' },
+          { label: 'Hold and monitor', detail: 'Watch closely before spending' },
+        ],
+      },
+      {
+        title: 'Set coverage zones',
+        description: 'Choose where to concentrate the demand response.',
+        options: [
+          { label: 'Top 5 demand zones', detail: 'Focus on the strongest surge', recommended: true },
+          { label: 'City-wide', detail: 'Broad coverage, higher spend' },
+          { label: 'Custom selection', detail: 'Hand-pick specific zones' },
+        ],
+      },
+      {
+        title: 'Assign an owner',
+        description: 'Pick a team to track supply coverage against demand.',
+        options: [
+          { label: 'Supply Ops', detail: 'Owns Dasher coverage', recommended: true },
+          { label: 'Forecasting team', detail: 'Owns demand modeling' },
+          { label: 'Leave unassigned', detail: 'Monitor manually for now' },
+        ],
+      },
+    ],
+    success: {
+      title: 'Demand response staged',
+      description:
+        'Peak pay is pre-positioned across the top 5 demand zones and Supply Ops is tracking coverage as demand runs ahead of forecast.',
+      results: [
+        { label: 'Zones covered', value: '5' },
+        { label: 'Undersupply risk', value: 'Lowered' },
+        { label: 'Coverage', value: 'Monitoring' },
+      ],
+    },
+  },
   'mission-undersupply': {
     steps: [
       {

@@ -61,7 +61,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
         onClick={onClose}
         aria-hidden
         className={cn(
-          'fixed inset-0 z-40 bg-ink/30 transition-opacity duration-300',
+          'fixed inset-0 z-40 m-0 bg-ink/30 transition-opacity duration-300',
           open ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       />
@@ -70,7 +70,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
         aria-modal="true"
         aria-label={issue?.title ?? 'Issue detail'}
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-drawer transition-transform duration-300 ease-out sm:w-[440px]',
+          'fixed inset-y-0 right-0 z-50 m-0 flex w-full flex-col bg-white shadow-drawer transition-transform duration-300 ease-out sm:w-[440px]',
           open ? 'translate-x-0' : 'translate-x-full',
         )}
       >
@@ -78,16 +78,18 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
           <>
             <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
               <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusChip tone={issue.tone} dot>
-                    {issue.severity}
-                  </StatusChip>
-                  <span className="text-xs font-semibold tracking-[0.08em] text-ink-tertiary uppercase">
-                    {issue.tags.join(' · ')}
-                  </span>
-                </div>
+                <span className="text-xs font-semibold tracking-[0.08em] text-ink-tertiary uppercase">
+                  {issue.tags.join(' · ')}
+                </span>
                 <h2 className="mt-2 text-xl leading-snug font-bold">
                   {issue.title}
+                  <StatusChip
+                    tone={issue.tone}
+                    dot
+                    className="ml-4 align-middle"
+                  >
+                    {issue.severity}
+                  </StatusChip>
                 </h2>
               </div>
               <button
@@ -164,7 +166,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
                             className={cn(
                               'flex w-full cursor-pointer items-start gap-3 rounded-2xl border p-3.5 text-left transition-colors',
                               isSelected
-                                ? 'border-brand bg-canvas'
+                                ? 'border-line bg-canvas'
                                 : 'border-line hover:border-ink-tertiary/40',
                             )}
                           >
