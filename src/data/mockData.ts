@@ -79,7 +79,7 @@ export const issues: Issue[] = [
     cause: 'Dasher supply -18% vs demand',
     recommendation: 'Add $2 peak pay for 90 minutes',
     owner: 'Unassigned',
-    primaryLabel: 'Review action',
+    primaryLabel: "Let's fix this",
   },
   {
     id: 'grocery-substitutions',
@@ -91,7 +91,7 @@ export const issues: Issue[] = [
     cause: 'Low item availability at 12 stores',
     recommendation: 'Notify merchant ops',
     owner: 'Merchant Ops',
-    primaryLabel: 'Review action',
+    primaryLabel: "Let's fix this",
   },
   {
     id: 'san-mateo-prep',
@@ -103,7 +103,7 @@ export const issues: Issue[] = [
     cause: 'Prep time variance at top 8 merchants',
     recommendation: 'Pause promo exposure in affected zone',
     owner: 'Marketplace Ops',
-    primaryLabel: 'Review action',
+    primaryLabel: "Let's fix this",
   },
 ]
 
@@ -121,7 +121,7 @@ export const tileIssues: Record<string, Issue> = {
     cause: 'Dinner peak demand and merchant variance compounding across zones',
     recommendation: 'Launch a coordinated triage plan',
     owner: 'Marketplace Ops',
-    primaryLabel: 'Review action',
+    primaryLabel: "Let's fix this",
   },
   'demand-forecast': {
     id: 'demand-forecast',
@@ -133,7 +133,7 @@ export const tileIssues: Record<string, Issue> = {
     cause: 'Forecast underestimated dinner peak demand across zones',
     recommendation: 'Pre-position supply and incentives',
     owner: 'Supply Ops',
-    primaryLabel: 'Review action',
+    primaryLabel: "Let's fix this",
   },
 }
 
@@ -276,6 +276,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
         { label: 'First review', value: '60 min' },
         { label: 'Owners assigned', value: 'All' },
       ],
+      probability: 88,
+      probabilityReason:
+        'Owners are assigned and the review window is tight, but coordinating three teams adds variance.',
+      watch:
+        'all three issues for progress at the 60-minute review, and escalate any owner who hasn’t started.',
     },
   },
   'demand-forecast': {
@@ -322,6 +327,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
         { label: 'Undersupply risk', value: 'Lowered' },
         { label: 'Coverage', value: 'Monitoring' },
       ],
+      probability: 84,
+      probabilityReason:
+        'Peak pay reliably lifts coverage, but demand is running ahead of forecast.',
+      watch:
+        'coverage against demand in the top 5 zones — if the gap widens past 45 minutes, add zones or raise pay.',
     },
   },
   'mission-undersupply': {
@@ -373,6 +383,10 @@ export const solutionFlows: Record<string, SolutionFlow> = {
         { label: 'On-time rate', value: '+4 pts' },
         { label: 'Cancellation risk', value: '-1.6 pts' },
       ],
+      probability: 92,
+      probabilityReason: 'Targeted peak pay in one zone is a strong, well-observed pattern.',
+      watch:
+        'Dasher acceptance in Mission District over the next 30 minutes; if supply doesn’t climb, extend the duration or raise the incentive.',
     },
   },
   'grocery-substitutions': {
@@ -425,6 +439,10 @@ export const solutionFlows: Record<string, SolutionFlow> = {
         { label: 'Cancellations', value: '-1.8 pts' },
         { label: 'Substitution rate', value: 'Monitoring' },
       ],
+      probability: 79,
+      probabilityReason: 'Alerts help, but restocking depends on merchants acting on them.',
+      watch:
+        'substitution and cancellation rates at the 12 stores; follow up by phone with any partner still low after 30 minutes.',
     },
   },
   'san-mateo-prep': {
@@ -476,6 +494,10 @@ export const solutionFlows: Record<string, SolutionFlow> = {
         { label: 'Avg delivery time', value: '-7 min' },
         { label: 'Prep variance', value: 'Monitoring' },
       ],
+      probability: 86,
+      probabilityReason: 'Pausing promos eases the surge, though staffing also affects prep times.',
+      watch:
+        'average prep time across the 8 merchants; if it doesn’t fall within the hour, re-quote customer delivery times.',
     },
   },
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Check, X } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { solutionFlows } from '@/data/mockData'
 import type { Issue } from '@/types'
 import { cn } from '@/lib/utils'
+import { FlowSuccess, customActionSuccess } from './FlowSuccess'
 
 interface SolutionFlowContentProps {
   issue: Issue
@@ -82,6 +83,16 @@ export function SolutionFlowContent({
 
   const headerTitle = isSuccess ? 'Complete' : step.title
 
+  // Success content: the custom path shows the typed action; the standard path
+  // shows the decision made at each step.
+  const success = customSuccess ? customActionSuccess : flow.success
+  const successChoices = customSuccess
+    ? [{ label: 'Your action', value: customText.trim() }]
+    : flow.steps.map((s, i) => ({
+        label: s.title,
+        value: s.options[selections[i]]?.label ?? '—',
+      }))
+
   return (
     <div>
       <header className="relative flex items-center justify-between border-b border-line px-3 py-3">
@@ -107,38 +118,14 @@ export function SolutionFlowContent({
       </header>
 
       {isSuccess ? (
-        <div className="px-6 py-7 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-good-soft">
-            <Check className="size-7 text-good" strokeWidth={2.75} />
-          </div>
-          <h3 className="mt-4 text-xl font-bold tracking-tight">
-            {customSuccess ? 'Action taken' : flow.success.title}
-          </h3>
-          <p className="mx-auto mt-2 max-w-[320px] text-sm leading-relaxed text-ink-secondary">
-            {customSuccess
-              ? 'Your action has been taken. We’ll track its impact below.'
-              : flow.success.description}
-          </p>
-          {!customSuccess && (
-            <ul className="mt-5 divide-y divide-line rounded-2xl border border-line text-left">
-              {flow.success.results.map((result) => (
-                <li
-                  key={result.label}
-                  className="flex items-center justify-between px-4 py-3 text-sm"
-                >
-                  <span className="text-ink-secondary">{result.label}</span>
-                  <span className="font-bold text-good">{result.value}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="mx-auto mt-4 max-w-[320px] text-[13px] leading-relaxed text-ink-tertiary">
-            This issue has been addressed and moved to{' '}
-            <span className="font-semibold text-ink-secondary">
-              Impact tracking
-            </span>{' '}
-            lower on the page, where you can monitor its results.
-          </p>
+        <div className="px-6 py-7">
+          <FlowSuccess
+            title={success.title}
+            choices={successChoices}
+            probability={success.probability}
+            probabilityReason={success.probabilityReason}
+            watch={success.watch}
+          />
         </div>
       ) : (
         <div className="px-6 pt-5 pb-1">
@@ -254,7 +241,7 @@ export function SolutionFlowContent({
           disabled={continueDisabled}
           onClick={isSuccess ? onComplete : handleContinue}
         >
-          {isSuccess ? 'Done' : 'Continue'}
+          {isSuccess ? 'Got it' : 'Continue'}
         </Button>
       </div>
     </div>

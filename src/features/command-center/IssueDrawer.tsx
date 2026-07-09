@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { StatusChip } from '@/components/ui/StatusChip'
 import { solutionFlows } from '@/data/mockData'
 import type { Issue } from '@/types'
 import { cn } from '@/lib/utils'
+import { FlowSuccess, customActionSuccess } from './FlowSuccess'
 
 interface IssueDrawerProps {
   issue: Issue | null
@@ -52,6 +53,16 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
   const isCustom = step ? selections[stepIndex] === customIndex : false
   const continueDisabled = isCustom && customText.trim() === ''
 
+  // Success content: the custom path shows the typed action; the standard path
+  // shows the decision made at each step.
+  const success = customSuccess ? customActionSuccess : flow?.success
+  const successChoices = customSuccess
+    ? [{ label: 'Your action', value: customText.trim() }]
+    : (flow?.steps ?? []).map((s, i) => ({
+        label: s.title,
+        value: s.options[selections[i]]?.label ?? '—',
+      }))
+
   const handleContinue = () => {
     if (isCustom) {
       setCustomSuccess(true)
@@ -82,7 +93,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
         onClick={onClose}
         aria-hidden
         className={cn(
-          'fixed inset-0 z-40 m-0 bg-ink/30 transition-opacity duration-300',
+          'fixed inset-0 z-40 m-0 bg-ink/50 backdrop-blur-sm transition-opacity duration-300',
           open ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       />
@@ -124,33 +135,14 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-6">
-              {isSuccess ? (
-                <div className="text-center">
-                  <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-good-soft">
-                    <Check className="size-7 text-good" strokeWidth={2.75} />
-                  </div>
-                  <h3 className="mt-4 text-xl font-bold tracking-tight">
-                    {customSuccess ? 'Action taken' : flow.success.title}
-                  </h3>
-                  <p className="mx-auto mt-2 max-w-[320px] text-sm leading-relaxed text-ink-secondary">
-                    {customSuccess
-                      ? 'Your action has been taken. We’ll track its impact below.'
-                      : flow.success.description}
-                  </p>
-                  {!customSuccess && (
-                    <ul className="mt-5 divide-y divide-line rounded-2xl border border-line text-left">
-                      {flow.success.results.map((result) => (
-                        <li
-                          key={result.label}
-                          className="flex items-center justify-between px-4 py-3 text-sm"
-                        >
-                          <span className="text-ink-secondary">{result.label}</span>
-                          <span className="font-bold text-good">{result.value}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+              {isSuccess && success ? (
+                <FlowSuccess
+                  title={success.title}
+                  choices={successChoices}
+                  probability={success.probability}
+                  probabilityReason={success.probabilityReason}
+                  watch={success.watch}
+                />
               ) : (
                 <>
                   <div className="rounded-2xl bg-canvas p-4">
@@ -277,7 +269,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
                 disabled={!isSuccess && continueDisabled}
                 onClick={isSuccess ? handleDone : handleContinue}
               >
-                {isSuccess ? 'Mark resolved' : 'Continue'}
+                {isSuccess ? 'Got it' : 'Continue'}
               </Button>
               {!isSuccess && stepIndex > 0 && (
                 <button

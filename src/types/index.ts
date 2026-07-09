@@ -90,6 +90,12 @@ export interface SolutionSuccess {
   title: string
   description: string
   results: { label: string; value: string }[]
+  /** Modeled probability the action succeeds (0–100; capped at 97 on display). */
+  probability: number
+  /** One-line rationale shown beside the probability. */
+  probabilityReason: string
+  /** What the operator should monitor once the action is launched. */
+  watch: string
 }
 
 export interface SolutionFlow {
