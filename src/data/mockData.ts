@@ -247,6 +247,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Batch by category', detail: 'Group issues by marketplace area' },
           { label: 'Split across team', detail: 'Assign each issue to a different owner' },
         ],
+        thinkingMessages: [
+          'Comparing order-risk exposure across the three active issues.',
+          'Weighing highest-impact-first against a batched review.',
+          'Modeling how each triage order affects time-to-resolution.',
+        ],
       },
       {
         title: 'Set response window',
@@ -256,6 +261,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Next 2 hours', detail: 'Steady pace through the evening' },
           { label: 'Rest of shift', detail: 'Lower urgency, monitor over time' },
         ],
+        thinkingMessages: [
+          'Estimating how fast each response window contains the issues.',
+          'Checking Dasher and merchant capacity through the evening.',
+          'Balancing urgency against team bandwidth.',
+        ],
       },
       {
         title: 'Notify & assign',
@@ -264,6 +274,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Alert on-call ops', detail: 'Notify the on-call marketplace team' },
           { label: 'Assign owners per issue', detail: 'Route each issue to a named owner' },
           { label: 'Do both', detail: 'Alert on-call and assign owners', recommended: true },
+        ],
+        thinkingMessages: [
+          "Mapping the right on-call teams for each issue.",
+          'Drafting notification language for ops and merchant channels.',
+          "Checking who's available to own follow-up.",
         ],
       },
     ],
@@ -298,6 +313,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Raise forecast baseline', detail: 'Reset the model to current demand' },
           { label: 'Hold and monitor', detail: 'Watch closely before spending' },
         ],
+        thinkingMessages: [
+          'Studying why order demand is running 14% above forecast.',
+          'Modeling supply gap risk if no action is taken.',
+          'Comparing peak pay against a forecast rebaseline.',
+        ],
       },
       {
         title: 'Set coverage zones',
@@ -307,6 +327,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'City-wide', detail: 'Broad coverage, higher spend' },
           { label: 'Custom selection', detail: 'Hand-pick specific zones' },
         ],
+        thinkingMessages: [
+          'Ranking zones by strength of the demand surge.',
+          'Estimating spend for city-wide vs targeted coverage.',
+          'Checking Dasher density in the top demand zones.',
+        ],
       },
       {
         title: 'Assign an owner',
@@ -315,6 +340,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Supply Ops', detail: 'Owns Dasher coverage', recommended: true },
           { label: 'Forecasting team', detail: 'Owns demand modeling' },
           { label: 'Leave unassigned', detail: 'Monitor manually for now' },
+        ],
+        thinkingMessages: [
+          'Matching this workstream to the right owning team.',
+          "Checking Supply Ops' current on-call load.",
+          'Confirming who tracks coverage against demand today.',
         ],
       },
     ],
@@ -349,6 +379,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           },
           { label: '+$2.50 per delivery', detail: 'Fastest recovery, higher spend' },
         ],
+        thinkingMessages: [
+          'Studying what would be optimal options for additional peak pay during dinner hours.',
+          'Modeling recovery speed at $1.50, $2.00, and $2.50 per delivery.',
+          'Weighing incentive cost against expected order recovery.',
+        ],
       },
       {
         title: 'Set active duration',
@@ -362,6 +397,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           },
           { label: '120 minutes', detail: 'Extended coverage past peak' },
         ],
+        thinkingMessages: [
+          'Mapping the dinner peak window in Mission District.',
+          'Estimating how long the supply gap typically persists.',
+          'Balancing coverage length against incentive spend.',
+        ],
       },
       {
         title: 'Notify & assign',
@@ -371,6 +411,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Push to nearby Dashers', detail: 'Notify Dashers within the zone' },
           { label: 'Assign to Supply Ops', detail: 'Route monitoring to the on-call team' },
           { label: 'Do both', detail: 'Notify Dashers and assign an owner', recommended: true },
+        ],
+        thinkingMessages: [
+          'Drafting the Dasher push notification for the zone.',
+          "Checking Supply Ops' availability to monitor results.",
+          'Confirming the best way to alert nearby Dashers.',
         ],
       },
     ],
@@ -404,6 +449,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'All city-wide grocery', detail: 'Broader reach, more noise' },
           { label: 'Custom selection', detail: 'Hand-pick specific stores' },
         ],
+        thinkingMessages: [
+          'Ranking grocery stores by cancellation impact.',
+          'Checking item-level availability across the city.',
+          'Narrowing to the stores driving the most substitutions.',
+        ],
       },
       {
         title: 'Choose outreach method',
@@ -418,6 +468,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
             recommended: true,
           },
         ],
+        thinkingMessages: [
+          'Comparing automated alerts against direct Merchant Ops outreach.',
+          'Estimating response time for each outreach channel.',
+          'Drafting availability alert language for partners.',
+        ],
       },
       {
         title: 'Assign an owner',
@@ -427,6 +482,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Merchant Ops', detail: 'Owns partner relationships', recommended: true },
           { label: 'Grocery Partnerships', detail: 'Owns category strategy' },
           { label: 'Leave unassigned', detail: 'Monitor manually for now' },
+        ],
+        thinkingMessages: [
+          'Matching this outreach to the right owning team.',
+          "Checking Merchant Ops' current partner coverage.",
+          'Confirming who tracks substitution rates after outreach.',
         ],
       },
     ],
@@ -460,6 +520,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'All San Mateo merchants', detail: 'Full-zone review' },
           { label: 'Custom selection', detail: 'Hand-pick specific merchants' },
         ],
+        thinkingMessages: [
+          'Studying prep time variance across San Mateo merchants.',
+          'Ranking merchants by contribution to the spike.',
+          'Checking which merchants are driving the longest delays.',
+        ],
       },
       {
         title: 'Choose intervention',
@@ -473,6 +538,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Adjust quoted times', detail: 'Reset customer expectations' },
           { label: 'Do both', detail: 'Pause promos and re-quote times' },
         ],
+        thinkingMessages: [
+          'Weighing promo pause against re-quoting delivery times.',
+          'Modeling how each intervention affects order volume.',
+          'Estimating how quickly prep times would recover.',
+        ],
       },
       {
         title: 'Assign an owner',
@@ -482,6 +552,11 @@ export const solutionFlows: Record<string, SolutionFlow> = {
           { label: 'Merchant Ops', detail: 'Owns merchant performance', recommended: true },
           { label: 'Growth Ops', detail: 'Owns promo strategy' },
           { label: 'Leave unassigned', detail: 'Monitor manually for now' },
+        ],
+        thinkingMessages: [
+          'Matching this workstream to the right owning team.',
+          "Checking Merchant Ops' current merchant load.",
+          'Confirming who monitors prep times until they normalize.',
         ],
       },
     ],

@@ -6,6 +6,9 @@ import { solutionFlows } from '@/data/mockData'
 import type { Issue } from '@/types'
 import { cn } from '@/lib/utils'
 import { FlowSuccess, customActionSuccess } from './FlowSuccess'
+import { ThinkingPanel } from './ThinkingPanel'
+
+const THINKING_DURATION = 5000
 
 interface IssueDrawerProps {
   issue: Issue | null
@@ -23,6 +26,9 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
   // True once the flow was completed via the "Something else…" path, which
   // skips the remaining steps and shows a generic confirmation instead.
   const [customSuccess, setCustomSuccess] = useState(false)
+  // Steps whose "thinking" simulation has already finished — revisiting one
+  // via Back shows it instantly instead of re-running the simulation.
+  const [revealedSteps, setRevealedSteps] = useState<Set<number>>(() => new Set())
 
   useEffect(() => {
     if (!issue) return
@@ -30,6 +36,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
     setStepIndex(0)
     setCustomText('')
     setCustomSuccess(false)
+    setRevealedSteps(new Set())
     setSelections(
       steps.map((step) => {
         const rec = step.options.findIndex((o) => o.recommended)
@@ -48,10 +55,21 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
   const totalSteps = flow?.steps.length ?? 0
   const isSuccess = flow ? stepIndex >= totalSteps : false
   const step = flow?.steps[stepIndex]
+  const isThinking = !isSuccess && !!step && !revealedSteps.has(stepIndex)
   // The synthetic "Something else…" option lives just past the real ones.
   const customIndex = step ? step.options.length : -1
   const isCustom = step ? selections[stepIndex] === customIndex : false
-  const continueDisabled = isCustom && customText.trim() === ''
+  const continueDisabled = isThinking || (isCustom && customText.trim() === '')
+
+  // Simulate the assistant working through the current step before its
+  // options are revealed. Skipped once a step has already been shown.
+  useEffect(() => {
+    if (!isThinking) return
+    const id = window.setTimeout(() => {
+      setRevealedSteps((prev) => new Set(prev).add(stepIndex))
+    }, THINKING_DURATION)
+    return () => window.clearTimeout(id)
+  }, [isThinking, stepIndex])
 
   // Success content: the custom path shows the typed action; the standard path
   // shows the decision made at each step.
@@ -76,9 +94,10 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
     setCustomSuccess(false)
     setStepIndex((i) => Math.max(0, i - 1))
   }
+  // onResolve already advances to the next queued issue (or closes the
+  // drawer if the queue is empty) — don't also call onClose here.
   const handleDone = () => {
     if (issue) onResolve(issue.id)
-    onClose()
   }
   const selectOption = (optionIndex: number) =>
     setSelections((prev) => {
@@ -88,23 +107,16 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
     })
 
   return (
-    <>
-      <div
-        onClick={onClose}
-        aria-hidden
-        className={cn(
-          'fixed inset-0 z-40 m-0 bg-ink/50 backdrop-blur-sm transition-opacity duration-300',
-          open ? 'opacity-100' : 'pointer-events-none opacity-0',
-        )}
-      />
+    <div
+      className={cn(
+        'sticky top-16 z-10 h-[calc(100vh-4rem)] shrink-0 overflow-hidden transition-[width] duration-300 ease-out',
+        open ? 'w-[440px]' : 'w-0',
+      )}
+    >
       <aside
-        role="dialog"
-        aria-modal="true"
+        role="region"
         aria-label={issue?.title ?? 'Issue detail'}
-        className={cn(
-          'fixed inset-y-0 right-0 z-50 m-0 flex w-full flex-col bg-white shadow-drawer transition-transform duration-300 ease-out sm:w-[440px]',
-          open ? 'translate-x-0' : 'translate-x-full',
-        )}
+        className="flex h-full w-[440px] flex-col border-l border-line bg-white"
       >
         {issue && flow && (
           <>
@@ -151,6 +163,9 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
                     <p className="mt-1 text-sm text-ink-secondary">{issue.cause}</p>
                   </div>
 
+                  {isThinking ? (
+                    <ThinkingPanel messages={step!.thinkingMessages} className="mt-6 p-0" />
+                  ) : (
                   <div className="mt-6">
                     <p className="text-[11px] font-semibold tracking-[0.14em] text-ink-tertiary uppercase">
                       Step {stepIndex + 1} of {totalSteps}
@@ -258,6 +273,7 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
                       )}
                     </div>
                   </div>
+                  )}
                 </>
               )}
             </div>
@@ -284,6 +300,6 @@ export function IssueDrawer({ issue, onClose, onResolve }: IssueDrawerProps) {
           </>
         )}
       </aside>
-    </>
+    </div>
   )
 }

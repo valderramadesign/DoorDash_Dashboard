@@ -3,7 +3,6 @@ import { Sparkles, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { StatusChip } from '@/components/ui/StatusChip'
 import type { Issue, MorphOrigin, Tone } from '@/types'
-import { SolutionFlowContent } from './SolutionFlowContent'
 
 interface IssueAlertModalProps {
   title: string
@@ -13,10 +12,10 @@ interface IssueAlertModalProps {
   cause: string
   recommendation: string
   origin: MorphOrigin
-  /** The issue whose solution flow runs in-place when "Let's fix this" is clicked. */
+  /** The issue that "Let's fix this" hands off to the side panel. */
   issue: Issue | null
-  /** Flow reached success and was dismissed — the issue is now being tracked. */
-  onComplete: () => void
+  /** "Let's fix this" was clicked — the modal closes and the fix moves to the side panel. */
+  onStartFix: () => void
   onDismiss: () => void
 }
 
@@ -38,12 +37,11 @@ export function IssueAlertModal({
   recommendation,
   origin,
   issue,
-  onComplete,
+  onStartFix,
   onDismiss,
 }: IssueAlertModalProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const [phase, setPhase] = useState<'start' | 'open' | 'closing'>('start')
-  const [view, setView] = useState<'alert' | 'flow'>('alert')
   const [contentHeight, setContentHeight] = useState(origin.height)
   const exitActionRef = useRef<() => void>(onDismiss)
 
@@ -73,8 +71,7 @@ export function IssueAlertModal({
     radius: OPEN_RADIUS,
   }
 
-  // Track the live content height so the panel animates as the view (alert →
-  // flow steps → success) changes, keeping the flow inside this same panel.
+  // Track the live content height so the panel animates to fit its content.
   useLayoutEffect(() => {
     const el = contentRef.current
     if (!el) return
@@ -139,70 +136,61 @@ export function IssueAlertModal({
             transitionDelay: contentVisible ? `${Math.round(DURATION * 0.35)}ms` : '0ms',
           }}
         >
-          {view === 'flow' && issue ? (
-            <SolutionFlowContent
-              issue={issue}
-              onBack={() => setView('alert')}
-              onExit={() => requestExit(onDismiss)}
-              onComplete={() => requestExit(onComplete)}
-            />
-          ) : (
-            <div className="p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2
-                    id="issue-alert-title"
-                    className="text-lg leading-snug font-bold tracking-tight"
-                  >
-                    {title}
-                  </h2>
-                  <StatusChip tone={tone} dot>
-                    {severity}
-                  </StatusChip>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => requestExit(onDismiss)}
-                  aria-label="Close"
-                  className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink-secondary transition-colors hover:bg-canvas hover:text-ink"
+          <div className="p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="issue-alert-title"
+                  className="text-lg leading-snug font-bold tracking-tight"
                 >
-                  <X className="size-4.5" />
-                </button>
+                  {title}
+                </h2>
+                <StatusChip tone={tone} dot>
+                  {severity}
+                </StatusChip>
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-ink-secondary">
-                {explanation}
-              </p>
-
-              <div className="mt-4 rounded-2xl bg-canvas p-4">
-                <p className="text-xs font-semibold tracking-[0.08em] text-ink-tertiary uppercase">
-                  What's causing it
-                </p>
-                <p className="mt-1 text-sm text-ink">{cause}</p>
-              </div>
-
-              <p className="mt-3 inline-flex items-start gap-1.5 rounded-2xl bg-brand-soft px-3.5 py-2.5 text-sm font-semibold text-brand">
-                <Sparkles className="mt-0.5 size-4 shrink-0" />
-                {recommendation}
-              </p>
-
-              <Button
-                variant="primary"
-                className="mt-5 w-full justify-center"
-                onClick={() =>
-                  issue ? setView('flow') : requestExit(onDismiss)
-                }
-              >
-                Let's fix this
-              </Button>
               <button
                 type="button"
                 onClick={() => requestExit(onDismiss)}
-                className="mt-2.5 w-full cursor-pointer py-1 text-center text-sm font-semibold text-ink-secondary transition-colors hover:text-ink"
+                aria-label="Close"
+                className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink-secondary transition-colors hover:bg-canvas hover:text-ink"
               >
-                Not now
+                <X className="size-4.5" />
               </button>
             </div>
-          )}
+            <p className="mt-2 text-sm leading-relaxed text-ink-secondary">
+              {explanation}
+            </p>
+
+            <div className="mt-4 rounded-2xl bg-canvas p-4">
+              <p className="text-xs font-semibold tracking-[0.08em] text-ink-tertiary uppercase">
+                What's causing it
+              </p>
+              <p className="mt-1 text-sm text-ink">{cause}</p>
+            </div>
+
+            <p className="mt-3 inline-flex items-start gap-1.5 rounded-2xl bg-brand-soft px-3.5 py-2.5 text-sm font-semibold text-brand">
+              <Sparkles className="mt-0.5 size-4 shrink-0" />
+              {recommendation}
+            </p>
+
+            <Button
+              variant="primary"
+              className="mt-5 w-full justify-center"
+              onClick={() =>
+                issue ? requestExit(onStartFix) : requestExit(onDismiss)
+              }
+            >
+              Let's fix this
+            </Button>
+            <button
+              type="button"
+              onClick={() => requestExit(onDismiss)}
+              className="mt-2.5 w-full cursor-pointer py-1 text-center text-sm font-semibold text-ink-secondary transition-colors hover:text-ink"
+            >
+              Not now
+            </button>
+          </div>
         </div>
       </div>
     </>

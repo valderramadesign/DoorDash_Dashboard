@@ -84,6 +84,8 @@ export interface SolutionStep {
   title: string
   description: string
   options: SolutionOption[]
+  /** Short in-progress phrases cycled while the AI "thinks" through this step before it's revealed. */
+  thinkingMessages: string[]
 }
 
 export interface SolutionSuccess {

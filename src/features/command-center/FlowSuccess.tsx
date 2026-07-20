@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
+
+const PROBABILITY_THINKING_DURATION = 5000
 
 export interface FlowSuccessProps {
   title: string
@@ -25,6 +28,15 @@ export function FlowSuccess({
 }: FlowSuccessProps) {
   const pct = Math.min(97, Math.round(probability))
 
+  // The probability is modeled, not instant — reveal it (and its rationale)
+  // a beat after the rest of the success content.
+  const [revealed, setRevealed] = useState(false)
+  useEffect(() => {
+    setRevealed(false)
+    const id = window.setTimeout(() => setRevealed(true), PROBABILITY_THINKING_DURATION)
+    return () => window.clearTimeout(id)
+  }, [probability])
+
   return (
     <div>
       <div className="text-center">
@@ -45,18 +57,29 @@ export function FlowSuccess({
 
       <div className="mt-4 text-left">
         <div className="flex items-center gap-2">
-          <span className="shrink-0 text-[44px] leading-[1.05] font-bold tracking-tight text-good">
-            {pct}%
-          </span>
+          {revealed ? (
+            <span className="shrink-0 text-[44px] leading-[1.05] font-bold tracking-tight text-good">
+              {pct}%
+            </span>
+          ) : (
+            <span className="h-[38px] w-[84px] shrink-0 shimmer rounded-xl" />
+          )}
           <span className="text-sm leading-tight text-ink-secondary">
             Probability
             <br />
             of success
           </span>
         </div>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-ink">
-          {probabilityReason}
-        </p>
+        {revealed ? (
+          <p className="mt-1.5 text-[13px] leading-relaxed text-ink">
+            {probabilityReason}
+          </p>
+        ) : (
+          <div className="mt-2 space-y-1.5">
+            <span className="block h-3 w-full shimmer rounded-full" />
+            <span className="block h-3 w-3/5 shimmer rounded-full" />
+          </div>
+        )}
       </div>
 
       <div className="mt-4 rounded-2xl border border-warn/25 bg-warn-soft p-4 text-left">

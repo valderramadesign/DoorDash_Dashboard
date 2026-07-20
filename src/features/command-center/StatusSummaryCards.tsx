@@ -1,5 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { FixingBadge, InQueueBadge } from '@/components/ui/InQueueBadge'
 import { StatusChip } from '@/components/ui/StatusChip'
 import type { MorphOrigin, SummaryCard, Tone, TileAlert } from '@/types'
 import { cn, morphOriginFrom } from '@/lib/utils'
@@ -20,6 +21,8 @@ const toneTextColor: Record<SummaryCard['tone'], string> = {
 function MetricCard({
   card,
   onOpenAlert,
+  queued,
+  active,
 }: {
   card: SummaryCard
   onOpenAlert: (
@@ -28,7 +31,10 @@ function MetricCard({
     alert: TileAlert,
     origin: MorphOrigin,
   ) => void
+  queued: boolean
+  active: boolean
 }) {
+  const locked = queued || active
   const TrendIcon = trendIcons[card.trendDirection]
   const trendColor =
     card.tone === 'good'
@@ -40,7 +46,7 @@ function MetricCard({
   return (
     <Card
       onClick={
-        card.alert
+        card.alert && !locked
           ? (e) =>
               onOpenAlert(
                 card.label,
@@ -51,15 +57,22 @@ function MetricCard({
           : undefined
       }
       className={cn(
-        'p-6 transition-shadow hover:shadow-md',
-        card.alert && 'cursor-pointer',
+        'p-6 transition-[box-shadow,opacity]',
+        card.alert && !locked && 'cursor-pointer hover:shadow-md',
+        locked && 'cursor-not-allowed opacity-60',
       )}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex flex-wrap-reverse items-center justify-between gap-x-2 gap-y-1.5">
         <p className="text-xs font-semibold tracking-[0.08em] text-ink-tertiary uppercase">
           {card.label}
         </p>
-        <StatusChip tone={card.tone}>{card.chip}</StatusChip>
+        {queued ? (
+          <InQueueBadge />
+        ) : active ? (
+          <FixingBadge />
+        ) : (
+          <StatusChip tone={card.tone}>{card.chip}</StatusChip>
+        )}
       </div>
       <p
         className={`mt-3 text-[34px] leading-none font-bold tracking-tight ${toneTextColor[card.tone]}`}
@@ -88,13 +101,26 @@ interface StatusSummaryCardsProps {
     alert: TileAlert,
     origin: MorphOrigin,
   ) => void
+  queuedIssueIds: Set<string>
+  activeIssueId: string | null
 }
 
-export function StatusSummaryCards({ cards, onOpenAlert }: StatusSummaryCardsProps) {
+export function StatusSummaryCards({
+  cards,
+  onOpenAlert,
+  queuedIssueIds,
+  activeIssueId,
+}: StatusSummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => (
-        <MetricCard key={card.label} card={card} onOpenAlert={onOpenAlert} />
+        <MetricCard
+          key={card.label}
+          card={card}
+          onOpenAlert={onOpenAlert}
+          queued={!!card.alert?.issueId && queuedIssueIds.has(card.alert.issueId)}
+          active={!!card.alert?.issueId && card.alert.issueId === activeIssueId}
+        />
       ))}
     </div>
   )

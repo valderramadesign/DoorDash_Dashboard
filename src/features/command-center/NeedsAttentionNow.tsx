@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Sparkles, UserRound } from 'lucide-react'
+import { ArrowRight, Check, Loader2, Sparkles, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { StatusChip } from '@/components/ui/StatusChip'
@@ -8,14 +8,25 @@ import { cn } from '@/lib/utils'
 function IssueCard({
   issue,
   onOpen,
+  queued,
+  active,
 }: {
   issue: Issue
   onOpen: (issue: Issue) => void
+  queued: boolean
+  active: boolean
 }) {
   const unassigned = issue.owner.toLowerCase() === 'unassigned'
+  const locked = queued || active
 
   return (
-    <div className="rounded-2xl border border-line p-5 transition-colors hover:border-ink-tertiary/40">
+    <div
+      className={cn(
+        'rounded-2xl border border-line p-5 transition-[opacity,border-color]',
+        !locked && 'hover:border-ink-tertiary/40',
+        locked && 'opacity-60',
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -47,8 +58,25 @@ function IssueCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-3">
-          <Button variant="dark" size="sm" onClick={() => onOpen(issue)}>
-            {issue.primaryLabel}
+          <Button
+            variant="dark"
+            size="sm"
+            disabled={locked}
+            onClick={() => onOpen(issue)}
+          >
+            {queued ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Loader2 className="size-3.5 animate-spin" />
+                <span className="animate-blink-slow">In queue</span>
+              </span>
+            ) : active ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Sparkles className="size-3.5 animate-pulse" />
+                Fixing now
+              </span>
+            ) : (
+              issue.primaryLabel
+            )}
           </Button>
           <span
             className={cn(
@@ -68,9 +96,13 @@ function IssueCard({
 export function NeedsAttentionNow({
   issues,
   onOpenIssue,
+  queuedIssueIds,
+  activeIssueId,
 }: {
   issues: Issue[]
   onOpenIssue: (issue: Issue) => void
+  queuedIssueIds: Set<string>
+  activeIssueId: string | null
 }) {
   return (
     <Card className="p-6">
@@ -115,7 +147,13 @@ export function NeedsAttentionNow({
       ) : (
         <div className="mt-5 space-y-3">
           {issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} onOpen={onOpenIssue} />
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              onOpen={onOpenIssue}
+              queued={queuedIssueIds.has(issue.id)}
+              active={issue.id === activeIssueId}
+            />
           ))}
         </div>
       )}

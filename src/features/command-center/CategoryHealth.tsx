@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { FixingBadge, InQueueBadge } from '@/components/ui/InQueueBadge'
 import { StatusChip } from '@/components/ui/StatusChip'
 import { categories } from '@/data/mockData'
 import type { MorphOrigin, Tone, TileAlert } from '@/types'
@@ -36,9 +37,11 @@ interface CategoryHealthProps {
     alert: TileAlert,
     origin: MorphOrigin,
   ) => void
+  queuedIssueIds: Set<string>
+  activeIssueId: string | null
 }
 
-export function CategoryHealth({ onOpenAlert }: CategoryHealthProps) {
+export function CategoryHealth({ onOpenAlert, queuedIssueIds, activeIssueId }: CategoryHealthProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -69,11 +72,16 @@ export function CategoryHealth({ onOpenAlert }: CategoryHealthProps) {
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {categories.map((category) => {
             const Icon = categoryIcons[category.name] ?? Store
+            const queued =
+              !!category.alert?.issueId && queuedIssueIds.has(category.alert.issueId)
+            const active =
+              !!category.alert?.issueId && category.alert.issueId === activeIssueId
+            const locked = queued || active
             return (
               <div
                 key={category.name}
                 onClick={
-                  category.alert
+                  category.alert && !locked
                     ? (e) =>
                         onOpenAlert(
                           category.name,
@@ -84,17 +92,26 @@ export function CategoryHealth({ onOpenAlert }: CategoryHealthProps) {
                     : undefined
                 }
                 className={cn(
-                  'rounded-2xl border border-line p-5 transition-colors hover:border-ink-tertiary/40',
-                  category.alert && 'cursor-pointer',
+                  'rounded-2xl border border-line p-5 transition-[opacity,border-color]',
+                  category.alert && !locked && 'cursor-pointer hover:border-ink-tertiary/40',
+                  locked && 'cursor-not-allowed opacity-60',
                 )}
               >
-                <div className="flex items-center justify-between">
-                  <Icon className="size-5 text-ink-secondary" />
-                  <StatusChip tone={category.tone} dot>
-                    {category.status}
-                  </StatusChip>
+                <div className="flex flex-wrap-reverse items-center justify-between gap-x-2 gap-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <Icon className="size-5 text-ink-secondary" />
+                    <h3 className="text-[15px] font-bold">{category.name}</h3>
+                  </div>
+                  {queued ? (
+                    <InQueueBadge />
+                  ) : active ? (
+                    <FixingBadge />
+                  ) : (
+                    <StatusChip tone={category.tone} dot>
+                      {category.status}
+                    </StatusChip>
+                  )}
                 </div>
-                <h3 className="mt-3 text-[15px] font-bold">{category.name}</h3>
                 <p
                   className={`mt-1 text-xl font-bold tracking-tight ${toneTextColor[category.tone]}`}
                 >

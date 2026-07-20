@@ -20,7 +20,6 @@ import { IssueDrawer } from './IssueDrawer'
 import { NeedsAttentionNow } from './NeedsAttentionNow'
 import { PageHeader } from './PageHeader'
 import { RiskWatch } from './RiskWatch'
-import { SolutionFlow } from './SolutionFlow'
 import { StatusSummaryCards } from './StatusSummaryCards'
 import { WelcomeModal } from './WelcomeModal'
 
@@ -32,15 +31,18 @@ interface AlertTile {
 }
 
 export function MarketplaceCommandCenter() {
-  const [openIssue, setOpenIssue] = useState<Issue | null>(null)
   const [showWelcome, setShowWelcome] = useState(true)
-  const [flowIssue, setFlowIssue] = useState<Issue | null>(null)
-  const [flowFromWelcome, setFlowFromWelcome] = useState(false)
+  // The issue currently being worked on in the side panel, plus any issues
+  // waiting behind it — only one fix runs at a time.
+  const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
+  const [queue, setQueue] = useState<Issue[]>([])
   const [activeIssues, setActiveIssues] = useState<Issue[]>(issues)
   const [alertTile, setAlertTile] = useState<AlertTile | null>(null)
   const [impactItems, setImpactItems] = useState<ImpactTrackingItem[]>(impactTracking)
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const impactRef = useRef<HTMLDivElement>(null)
+
+  const queuedIssueIds = useMemo(() => new Set(queue.map((issue) => issue.id)), [queue])
 
   const resolveIssue = (issueId: string) =>
     setActiveIssues((prev) => prev.filter((issue) => issue.id !== issueId))
@@ -60,6 +62,30 @@ export function MarketplaceCommandCenter() {
     return issues.find((issue) => issue.id === id) ?? tileIssues[id] ?? null
   }
 
+  // Send an issue to the side panel: starts it immediately if the panel is
+  // free, otherwise queues it behind whatever's already running.
+  const requestFix = (issue: Issue) => {
+    if (!activeIssue) {
+      setActiveIssue(issue)
+      return
+    }
+    if (activeIssue.id === issue.id) return
+    setQueue((prev) => (prev.some((i) => i.id === issue.id) ? prev : [...prev, issue]))
+  }
+
+  // Pull the next queued issue (if any) into the side panel.
+  const advanceQueue = () => {
+    setQueue((prev) => {
+      if (prev.length === 0) {
+        setActiveIssue(null)
+        return prev
+      }
+      const [next, ...rest] = prev
+      setActiveIssue(next)
+      return rest
+    })
+  }
+
   // Fired when the solution flow reaches its success screen and is dismissed:
   // the issue leaves the active list and starts being monitored below.
   const completeFlow = (issue: Issue) => {
@@ -76,7 +102,7 @@ export function MarketplaceCommandCenter() {
       },
       ...prev.filter((item) => item.id !== rowId),
     ])
-    setFlowIssue(null)
+    advanceQueue()
     setHighlightId(rowId)
   }
 
@@ -109,23 +135,40 @@ export function MarketplaceCommandCenter() {
   }, [activeIssues.length])
 
   return (
-    <div className="mx-auto max-w-[1440px] space-y-6 px-5 py-6 sm:px-8 sm:py-8">
-      <PageHeader />
-      <StatusSummaryCards cards={statusCards} onOpenAlert={openAlert} />
-      <NeedsAttentionNow issues={activeIssues} onOpenIssue={setOpenIssue} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RiskWatch />
-        <div ref={impactRef} className="scroll-mt-6">
-          <ImpactTracking items={impactItems} highlightId={highlightId} />
+    <div className="flex items-start">
+      <div className="min-w-0 flex-1 space-y-6 px-5 py-6 sm:px-8 sm:py-8">
+        <div className="mx-auto max-w-[1440px] space-y-6">
+          <PageHeader />
+          <StatusSummaryCards
+            cards={statusCards}
+            onOpenAlert={openAlert}
+            queuedIssueIds={queuedIssueIds}
+            activeIssueId={activeIssue?.id ?? null}
+          />
+          <NeedsAttentionNow
+            issues={activeIssues}
+            onOpenIssue={requestFix}
+            queuedIssueIds={queuedIssueIds}
+            activeIssueId={activeIssue?.id ?? null}
+          />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <RiskWatch />
+            <div ref={impactRef} className="scroll-mt-6">
+              <ImpactTracking items={impactItems} highlightId={highlightId} />
+            </div>
+          </div>
+          <CategoryHealth
+            onOpenAlert={openAlert}
+            queuedIssueIds={queuedIssueIds}
+            activeIssueId={activeIssue?.id ?? null}
+          />
         </div>
       </div>
-      <CategoryHealth onOpenAlert={openAlert} />
       <IssueDrawer
-        issue={openIssue}
-        onClose={() => setOpenIssue(null)}
-        onResolve={(issueId) => {
-          const issue = issues.find((i) => i.id === issueId)
-          if (issue) completeFlow(issue)
+        issue={activeIssue}
+        onClose={advanceQueue}
+        onResolve={() => {
+          if (activeIssue) completeFlow(activeIssue)
         }}
       />
       {showWelcome && (
@@ -134,21 +177,7 @@ export function MarketplaceCommandCenter() {
           onGo={(issueId) => {
             setShowWelcome(false)
             const match = issues.find((issue) => issue.id === issueId)
-            if (match) {
-              setFlowFromWelcome(true)
-              setFlowIssue(match)
-            }
-          }}
-        />
-      )}
-      {flowIssue && (
-        <SolutionFlow
-          issue={flowIssue}
-          onExit={() => setFlowIssue(null)}
-          onComplete={() => completeFlow(flowIssue)}
-          onBack={() => {
-            setFlowIssue(null)
-            if (flowFromWelcome) setShowWelcome(true)
+            if (match) requestFix(match)
           }}
         />
       )}
@@ -163,10 +192,10 @@ export function MarketplaceCommandCenter() {
           recommendation={alertTile.alert.recommendation}
           issue={flowIssueFor(alertTile.alert)}
           onDismiss={() => setAlertTile(null)}
-          onComplete={() => {
+          onStartFix={() => {
             const issue = flowIssueFor(alertTile.alert)
             setAlertTile(null)
-            if (issue) completeFlow(issue)
+            if (issue) requestFix(issue)
           }}
         />
       )}
